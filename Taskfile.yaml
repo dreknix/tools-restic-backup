@@ -19,7 +19,7 @@ tasks:
       - sh: '[ "{{.RESTIC_REPOSITORY}}" != "<no value>" ]'
         msg: 'Variable "RESTIC_REPOSITORY" is not set'
       - sh: 'restic cat config && exit 1 || exit 0'
-        msg: 'Restic repository already initialized'
+        msg: 'Restic repository is already initialized'
 
   test_repo_exists:
     internal: true
