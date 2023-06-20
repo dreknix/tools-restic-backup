@@ -17,6 +17,19 @@ TMPFILE="$(mktemp /tmp/make_backup_XXXXXXXXXX)"
 
 script_failed=false
 
+# restic config file
+RESTIC_CONFIG_FILE="./.env"
+if [ ! -r "${RESTIC_CONFIG_FILE}" ]
+then
+  echo "ERROR: config file '.env' is missing"
+  false
+fi
+
+RESTIC=""
+# shellcheck disable=SC1090
+set -a && source "${RESTIC_CONFIG_FILE}" && set +a
+
+
 function script_trap_err() {
   trap - ERR      # Prevent potential recursion
 
@@ -33,14 +46,12 @@ function script_trap_exit() {
   then
     if [ "${RESTIC_EMAIL_ON_SUCCESS:-}" = true ]
     then
-      # mail -s "Info: $(hostname) make_backup.sh" root < "${TMPFILE}"
-      cat "${TMPFILE}"
+      mail -s "Info: $(hostname) make_backup.sh" "${RESTIC_EMAIL_ADDRESS:-root}" < "${TMPFILE}"
     fi
   else
     if [ "${RESTIC_EMAIL_ON_FAILURE:-}" = true ]
     then
-      # mail -s "ERROR: $(hostname) make_backup.sh failed" root < "${TMPFILE}"
-      cat "${TMPFILE}"
+      mail -s "ERROR: $(hostname) make_backup.sh failed" "${RESTIC_EMAIL_ADDRESS:-root}" < "${TMPFILE}"
     fi
   fi
   rm -f "${TMPFILE}"
@@ -58,18 +69,6 @@ function make_backup() {
     echo "ERROR: command jq not found"
     false
   fi
-
-  # restic config file
-  RESTIC_CONFIG_FILE="./.env"
-  if [ ! -r "${RESTIC_CONFIG_FILE}" ]
-  then
-    echo "ERROR: config file '.env' is missing"
-    false
-  fi
-
-  RESTIC=""
-  # shellcheck disable=SC1090
-  set -a && source "${RESTIC_CONFIG_FILE}" && set +a
 
   if [ -z "${RESTIC}" ]
   then
@@ -104,8 +103,7 @@ function make_backup() {
       --exclude-caches \
       ${BACKUP_EXCLUDE} \
       --one-file-system \
-      ${RESTIC_BACKUP_PATHS:-~/dreknix/tools/restic-backup}
-      # ${RESTIC_BACKUP_PATHS:-/home}
+      ${RESTIC_BACKUP_PATHS:-/home}
 
   echo ""
   echo "Show diff to last backup"
