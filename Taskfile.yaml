@@ -47,6 +47,12 @@ tasks:
     cmds:
       - "{{ .RESTIC }} ls {{ with .CLI_ARGS }}{{ . }}{{ else }}latest{{ end }}"
 
+  forget:
+    deps: [test_repo_exists]
+    desc: Forget snapshot
+    cmds:
+      - "{{ .RESTIC }} forget {{ with .CLI_ARGS }}{{ . }}{{ end }}"
+
   restore:
     deps: [test_repo_exists]
     desc: Restore files from snapshot
