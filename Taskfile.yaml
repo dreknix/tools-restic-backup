@@ -2,9 +2,9 @@
 
 # https://taskfile.dev
 
-version: '3'
+version: "3"
 
-dotenv: ['{{ if .REPO }}.env_{{ .REPO }}{{ else }}.env{{ end }}']
+dotenv: ["{{ if .REPO }}.env_{{ .REPO }}{{ else }}.env{{ end }}"]
 
 tasks:
 
@@ -17,64 +17,64 @@ tasks:
     internal: true
     preconditions:
       - sh: '[ "{{.RESTIC_REPOSITORY}}" != "<no value>" ]'
-        msg: 'Variable "RESTIC_REPOSITORY" is not set'
-      - sh: 'restic cat config && exit 1 || exit 0'
-        msg: 'Restic repository is already initialized'
+        msg: "Variable 'RESTIC_REPOSITORY' is not set"
+      - sh: '{{ .RESTIC }} cat config && exit 1 || exit 0'
+        msg: "Restic repository is already initialized"
 
   test_repo_exists:
     internal: true
     preconditions:
       - sh: '[ "{{.RESTIC_REPOSITORY}}" != "<no value>" ]'
-        msg: 'Variable "RESTIC_REPOSITORY" is not set'
-      - sh: 'restic cat config'
-        msg: 'Restic repository does not exist'
+        msg: "Variable 'RESTIC_REPOSITORY' is not set"
+      - sh: '{{ .RESTIC }} cat config'
+        msg: "Restic repository does not exist"
 
   init:
     deps: [test_repo_does_not_exist]
     desc: Initialize restic repository
     cmds:
-      - restic init
+      - "{{ .RESTIC }} init"
 
   snapshots:
     deps: [test_repo_exists]
     desc: List all available snapshots
     cmds:
-      - restic snapshots
+      - "{{ .RESTIC }} snapshots"
 
   list:
     deps: [test_repo_exists]
     desc: List files in latest snapshot
     cmds:
-      - restic ls {{ with .CLI_ARGS }}{{ . }}{{ else }}latest{{ end }}
+      - "{{ .RESTIC }} ls {{ with .CLI_ARGS }}{{ . }}{{ else }}latest{{ end }}"
 
   restore:
     deps: [test_repo_exists]
     desc: Restore files from snapshot
     cmds:
-      - restic restore {{ with .CLI_ARGS }}{{ . }}{{ else }}latest{{ end }} --target ./restore/
+      - "{{ .RESTIC }} restore {{ with .CLI_ARGS }}{{ . }}{{ else }}latest{{ end }} --target ./restore/"
 
   status:
     deps: [test_repo_exists]
     desc: Print statitics about the repository
     cmds:
-      - restic stats
+      - "{{ .RESTIC }} stats"
 
   check:
     deps: [test_repo_exists]
     desc: Check the restic repository
     cmds:
-      - restic check
+      - "{{ .RESTIC }} check"
 
   unlock:
     deps: [test_repo_exists]
     desc: Unlock the restic repository
     cmds:
-      - restic unlock
+      - "{{ .RESTIC }} unlock"
 
   cleanup:
     deps: [test_repo_exists]
     desc: Clean up restic cache
     cmds:
-      - restic cache --cleanup
+      - "{{ .RESTIC }} cache --cleanup"
 
 ...

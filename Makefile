@@ -10,6 +10,10 @@ else
   $(error Environment file '${ENV_FILE}' not found)
 endif
 
+ifndef RESTIC
+  RESTIC=restic
+endif
+
 .DEFAULT_GOAL:=help
 
 .PHONY: .test_repo_exists foobar help
@@ -18,37 +22,37 @@ endif
 ifndef RESTIC_REPOSITORY
 	$(error Variable "RESTIC_REPOSITORY" is not set)
 endif
-	@restic cat config > /dev/null 2>&1 && { echo "Restic repository is already initialized"; exit 1; } || exit 0
+	@${RESTIC} cat config > /dev/null 2>&1 && { echo "Restic repository is already initialized"; exit 1; } || exit 0
 
 .test_repo_exists:
 ifndef RESTIC_REPOSITORY
 	$(error Variable "RESTIC_REPOSITORY" is not set)
 endif
-	@restic cat config > /dev/null 2>&1 || { echo "Restic repository does not exists"; exit 1; }
+	@${RESTIC} cat config > /dev/null 2>&1 || { echo "Restic repository does not exists"; exit 1; }
 
 init: .test_repo_does_not_exist   ## Initialize restic repository
-	restic init
+	${RESTIC} init
 
 snapshots: .test_repo_exists      ## List all available snapshots
-	restic snapshots
+	${RESTIC} snapshots
 
 list: .test_repo_exists           ## List files in latest snapshot
-	restic ls latest
+	${RESTIC} ls latest
 
 restore: .test_repo_exists        ## Restore files from snapshot
-	restic restore latest --targe ./restore/
+	${RESTIC} restore latest --targe ./restore/
 
 status: .test_repo_exists         ## Print statitics about the repository
-	restic stats
+	${RESTIC} stats
 
 check: .test_repo_exists          ## Check the restic repository
-	restic stats
+	${RESTIC} stats
 
 unlock: .test_repo_exists         ## Unlock the restic repository
-	restic unlock
+	${RESTIC} unlock
 
 cleanup: .test_repo_exists        ## Unlock the restic repository
-	restic cache --cleanup
+	${RESTIC} cache --cleanup
 
 help:                             ## Show this help
 	@printf "\nUsage: make \033[36m<target>\033[0m\n"
