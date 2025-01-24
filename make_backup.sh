@@ -103,6 +103,7 @@ function make_backup() {
       --exclude-caches \
       ${BACKUP_EXCLUDE} \
       --one-file-system \
+      --hostname "${RESTIC_HOST}"
       ${RESTIC_BACKUP_PATHS:-/home}
 
   echo ""
