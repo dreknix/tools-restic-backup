@@ -136,6 +136,7 @@ function make_backup() {
     PERM_FILE="${RESTIC_PROM_DIRECTORY}/restic.prom"
 
     echo "restic_last_run_ts $(date +%s)" > "${TEMP_FILE}"
+    chmod go+r "${TEMP_FILE}"
 
     mv "${TEMP_FILE}" "${PERM_FILE}"
   fi
